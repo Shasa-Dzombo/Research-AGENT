@@ -1,0 +1,38 @@
+# Core FastAPI application
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+
+# Streamlit interface
+streamlit
+pandas
+
+# Database integration
+supabase
+
+# LangChain and LLM integration
+langchain-core
+langchain-google-genai
+langgraph
+
+# HTTP requests and utilities
+requests
+
+# Machine learning and embeddings (required for literature search)
+sentence-transformers
+torch
+transformers
+tokenizers
+huggingface-hub
+safetensors
+
+# Core scientific computing (required for sentence-transformers)
+numpy
+scipy
+scikit-learn
+
+# Utilities
+packaging
+tqdm
+regex
