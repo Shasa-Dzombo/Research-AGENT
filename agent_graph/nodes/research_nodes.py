@@ -15,17 +15,12 @@ def generate_questions_node(state: AgentState) -> AgentState:
     """Generate multiple main research questions and sub-questions"""
     llm = get_llm()
     
-    # Create messages directly without using templating
+    # Build system and user prompt strings and call the LLM wrapper
     system_message = PROMPT_STEP2
     user_message = f"Here is the project information: {json.dumps(state['project'], ensure_ascii=False)}. Please generate 3-5 main research questions and 3-5 sub-questions for each main question."
-    
-    # Use direct message creation instead of templating
-    messages = [
-        SystemMessage(content=system_message),
-        HumanMessage(content=user_message)
-    ]
-    
-    res = llm.invoke(messages)
+
+    # Call the LLM wrapper with explicit system prompt and user prompt string
+    res = llm.invoke(user_message, system_prompt=system_message)
     content = res.content
     
     # Parse the text response
@@ -98,20 +93,14 @@ def map_subquestions_node(state: AgentState) -> AgentState:
     subs = state["sub_questions"]
     llm = get_llm()
     
-    # Create message content
+    # Create message content and call LLM with explicit system prompt
     system_message = PROMPT_STEP3
-    
+
     sub_questions_text = "\n".join([f"- {s.text}" for s in subs])
     user_message = f"Here are the sub-questions to analyze:\n{sub_questions_text}"
-    
-    # Use direct message creation instead of templating
-    messages = [
-        SystemMessage(content=system_message),
-        HumanMessage(content=user_message)
-    ]
-    
-    res = llm.invoke(messages)
-    
+
+    res = llm.invoke(user_message, system_prompt=system_message)
+
     # Parse the response using our helper function
     parsed = parse_subquestion_mappings(res.content)
 
@@ -216,25 +205,19 @@ def identify_data_gaps_node(state: AgentState) -> AgentState:
         print("Warning: No valid sub-questions found for data gap analysis")
         return {**state, "data_gaps": [], "research_variables": []}
     
-    # Create message content
+    # Create message content and call LLM with explicit system prompt
     system_message = PROMPT_STEP4
-    
+
     known_vars_text = "\n".join([f"- {var}" for var in known_variables]) if known_variables else "None yet identified."
     reqs_text = "\n\n".join(sub_questions_with_requirements)
-    
+
     user_message = (
         f"Here are the known variables we already have:\n{known_vars_text}\n\n"
         f"Here are the sub-questions with their data requirements:\n{reqs_text}\n\n"
         f"Please identify what data variables are missing for each sub-question."
     )
-    
-    # Use direct message creation
-    messages = [
-        SystemMessage(content=system_message),
-        HumanMessage(content=user_message)
-    ]
-    
-    res = llm.invoke(messages)
+
+    res = llm.invoke(user_message, system_prompt=system_message)
     
     # Create example gaps based on the actual analyzed sub-questions
     example_gaps = []
@@ -408,14 +391,8 @@ ANALYSIS APPROACH SPECIFIED:
 CONTEXT: This sub-question is part of a larger research study. Your answer should be comprehensive, evidence-based, and directly incorporate the data requirements and analysis approach identified above."""
 
             # Use the LLM to generate a comprehensive answer
-            from langchain_core.messages import SystemMessage, HumanMessage
-            
-            messages = [
-                SystemMessage(content=PROMPT_ANSWER_GENERATION),
-                HumanMessage(content=user_message)
-            ]
-            
-            response = llm.invoke(messages)
+            # Call the LLM wrapper with the explicit answer-generation system prompt
+            response = llm.invoke(user_message, system_prompt=PROMPT_ANSWER_GENERATION)
             answer_text = response.content
             
             # Calculate confidence score based on the completeness of mapping information

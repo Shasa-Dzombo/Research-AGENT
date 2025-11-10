@@ -7,7 +7,7 @@ import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 
-from config.llm_factory import get_chatbot_llm
+from config.llm_factory import get_llm
 from agents.research_assistant import ResearchAssistant
 from utils import database_utils
 from utils import research_utils
@@ -21,7 +21,7 @@ class ConversationalAgent:
     """
     
     def __init__(self):
-        self.llm = get_chatbot_llm()
+        self.llm = get_llm()
         self.research_assistant = ResearchAssistant()
         self.db_utils = database_utils  # Module containing database functions
         self.research_utils = research_utils  # Module containing research functions
